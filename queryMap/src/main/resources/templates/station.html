@@ -1,0 +1,150 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="initial-scale=1.0, user-scalable=no, width=device-width">
+<title>公交站点查询</title>
+<link rel="stylesheet"
+	href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+<style type="text/css">
+html, body, #container {
+	height: 100%;
+}
+</style>
+<!-- <script type="text/javascript" src="/js/jquery.js"></script> -->
+ <script type="text/javascript" th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+</head>
+<body>			
+	
+	<div  style="text-align: center; margin:0 auto; width:400px; height:100px; border:1px solid #F00;margin-top: 50px;">
+		<br>
+		<label style='color: black'>公交站点查询</label><br><br>	
+		<input type="button" class="btn"  value="查询公交站点信息" onclick="queryStationName()"><br><br>	
+		<div id="text" style="text-align: center; margin:0 auto; width:400px; height:450px; border:1px solid #F00;margin-top: 15px;">
+			<label style='color: black'>查询过程：</label><br>
+			<label style='color: red'>若四分钟没有获取数据信息,请刷新从新查询</label><br><hr style='color: black'>
+		</div>		
+	</div>
+	<script type="text/javascript"
+		src="https://webapi.amap.com/maps?v=1.4.10&key=da3638f43295e0120ae58486da0c5b20&plugin=AMap.StationSearch"></script>
+	<script type="text/javascript">
+	 var gocount = 1;//站点名分组计数
+	 var tocount = 1;//查询高德次数计数
+	 var recount = 1;//后台接受数据次数计数
+	
+    /**
+    *从数据库获取所有站点名
+    */
+    function queryStationName(){
+    	$.ajax({
+    		 type: "GET",
+             dataType: "json",
+             url: "../querySN" ,
+             success: function (result) {
+                 console.log(result);
+                 if(result != null){
+                	 $("#text").append("start:"+"<br/>");
+                 	 $("#text").append("-->查询站点总数："+result.length+"条"+"<br/>");
+                	 getStationInfo(result);                	
+                 }                  
+             }
+    	});
+    }
+   	
+   
+    /**
+    *
+    *根据站点名获取所有站点详细信息
+    */
+    var station = new AMap.StationSearch({
+	        pageIndex: 1, 
+	        pageSize: 60, 
+	        city: '深圳'   
+	});
+    function getStationInfo(stationName){	
+    	 
+		 var sin = new Array();//装载公交站点查询数据结果集
+    	 var currName = new Array(); //子数组用来存分割完的站点名数据集
+    	 //对所有站点进行获取    
+         for(var j = 0; j < stationName.length; j++) {    	        	   
+        	
+        	   currName.push(stationName[j]);	       
+  	           if((j != 0 && (j + 1) % 2000 == 0) || j == stationName.length - 1) {
+    	          var length = currName.length;
+    	          $("#text").append("-->站点第"+gocount+"组查询："+currName.length+"条"+"<br/>");
+    	          gocount++;
+  	        	  console.log("站点名分割：" + currName.length); 	
+  	        	  
+  	        	  //将以2000位一组的站点名进行高德站点信息请求
+	  	          for(var i = 0; i < currName.length; i++){  		   	 		
+	  	         	 
+	  	       	       if(!currName[i]) {return;}		  	 
+	  	       		   //查询站点详细信息
+	  	     	       station.search(currName[i], function(status, result) {
+	  	     	            if (status === 'complete' && result.info === 'OK') {		           	            
+	  	     	            	 sin.push((result.stationInfo)[0]);	            		  	     	            	
+	  	     	            } else{	          	  	     	          		
+	  	     	            	--length;
+	  	     	            }
+		     	        	if(sin.length === length){
+		     	        		$("#text").append("-->查询高德第"+tocount+"组成功："+sin.length+"条"+"<br/>");
+		     	        		tocount++;
+		   	            		console.log(sin.length);
+		   	            		console.log(sin);
+		   	            		handleInfos(sin);
+		   	            		sin = [];
+	   	            	    }
+	  	     	        });  		
+	  	       	  }   	  	          
+  	        	  currName = [];
+  	        	 
+  	           }  
+          } 	
+    	
+    }
+    
+    /**
+    *对获取到的请求集进行分组处理
+    */
+    function handleInfos(sin){	 
+      
+ 	    var currData = new Array(); //子数组用来存分割完的数据 
+ 	  
+        for(var i = 0; i < sin.length; i++) {    	        	   
+ 	           currData.push(sin[i]);	       
+ 	           if((i != 0 && (i + 1) % 1000 == 0) || i == sin.length - 1) {
+ 	        	  $("#text").append("-->结果集第"+recount+"组："+currData.length+"条"+"<br/>");
+ 	        	  recount++;
+ 	        	  console.log("结果传递："+currData.length);        
+ 	              responseInfos(currData); 	             
+ 	              currData = [];
+ 	           }  
+         } 	       
+    }   
+    
+    
+    /**
+    *对结果集进行后台传递
+    */
+    function responseInfos(data){
+    	$.ajax({
+            type: "POST",
+            dataType: "JSON",
+            contentType: "application/json",
+            url: "/getstationinfo",
+            data: JSON.stringify(data),
+            async: true,
+            success: function (result) {
+               if(result == 0){
+            	   $("#text").append("-->查询成功！"+"end!"+"<br/>");  
+               }
+            }
+        });
+    }
+    
+    
+</script>
+</body>
+</html>

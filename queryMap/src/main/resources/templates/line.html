@@ -1,0 +1,129 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>公交线路查询</title>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/> 
+    <style type="text/css">
+       html,body,#container{
+           height:100%;
+       }
+    </style>
+     <script type="text/javascript" th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+</head>
+<body>
+  
+<div  style="text-align: center; margin:0 auto; width:400px; height:100px; border:1px solid #F00;margin-top: 100px;">
+	<br>
+	<label style='color: black'>公交路线查询</label><br><br>	
+	<input type="button" class="btn"  value="查询公交路线信息" onclick="queryLineName()"><br><br>	
+	<div id="text" style="text-align: center; margin:0 auto; width:400px; height:300px; border:1px solid #F00;margin-top: 15px;">
+		<label style='color: black'>查询过程：</label><br>
+		<label style='color: red'>若两分钟没有获取数据信息,请刷新从新查询</label><br><hr style='color: black'>
+	</div>		
+</div>
+<script type="text/javascript"
+            src="https://webapi.amap.com/maps?v=1.4.10&key=da3638f43295e0120ae58486da0c5b20&plugin=AMap.LineSearch"></script>
+<script language="javascript">
+     
+   /**
+    *从数据库获取所有站点名
+    */
+    function queryLineName(){
+    	$.ajax({
+    		 type: "GET",
+             dataType: "json",
+             url: "../queryLE" ,
+             success: function (result) {
+                 if(result != null){
+                	console.log(result);
+                	$("#text").append("start:"+"<br/>");
+                	$("#text").append("-->查询路线名数量："+result.length+"条"+"<br/>");
+                	getStationInfo(result);
+                 }
+                 
+             }
+    	});
+    }
+    
+  /** 
+   *根据站点名获取所有站点详细信息
+   */
+   var sin = new Array();
+   function getStationInfo(stationName){	
+			    
+	   	 var linesearch = new AMap.LineSearch({
+	         pageIndex: 1,
+	         city: '深圳',
+	         pageSize: 1,
+	         extensions: 'all'
+	     });
+	   	var count = stationName.length;
+	   	for(var i = 0; i < stationName.length; i++){  		   	 		  	 	
+	   		if(!stationName[i]) {return;}		  	 
+	   		//查询站点详细信息	      
+	 	      linesearch.search(stationName[i], function(status, result) {         
+	 	            if (status === 'complete' && result.info === 'OK') {		 	          	           		           
+ 	            		 sin.push((result.lineInfo)[0]);	            	
+ 		            	 if(sin.length === count){
+ 		            		$("#text").append("-->查询成功结果集条数："+sin.length+"条"+"<br/>");
+ 		            		console.log("查询完成后获得数据条数："+sin.length);
+ 		            		console.log(sin);
+ 		            		handleInfos(sin);
+ 		            	 }		 	            	           	 
+	 	            } else {
+	 	            	--count;	 	            			 	            
+	 	            }
+	      
+	 	      });
+	   	}   
+   }
+  
+   
+
+   /**
+   *对获取到的请求集进行分组处理
+   */
+   function handleInfos(){	     
+	   var currData = new Array(); //子数组用来存分割完的数据           
+       for(var i = 0; i < sin.length; i++) {
+           currData.push(sin[i]);
+           //在这里求300的余数,如果i不等于0,且可以整除 或者考虑到不满4个或等于4个的情况就要加上  i等于当前数组长度-1的时候
+           if((i != 0 && (i + 1) % 350 == 0) || i == sin.length - 1) {
+        	  $("#text").append("-->结果集分组后数量："+currData.length+"条"+"<br/>");
+        	  console.log("分组后结果集数量："+currData.length);        
+              responseInfos(currData);
+               //在这里清空currData
+              currData = [];
+           }           
+  	  }      
+   }   
+   
+   
+ 
+   
+   /**
+    *对分组后的结果集向后台传递
+    */
+    function responseInfos(data){
+ 		$.ajax({
+ 	           type: "POST",
+ 	           dataType: "JSON",
+ 	           contentType: "application/json",
+ 	           url: "/getlineinfo",
+ 	           data: JSON.stringify(data),
+ 	           async: true,
+ 	           success: function (result) {
+ 	              if(result == 0){
+ 	            	 $("#text").append("-->查询成功！"+"end!"+"<br/>");  
+ 	              }	             
+ 	           }
+ 	       });
+    }
+  
+   	
+</script>
+</body>
+</html>

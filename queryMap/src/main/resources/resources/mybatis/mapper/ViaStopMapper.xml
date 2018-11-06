@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.ViaStopMapper">
+
+    <insert id="insertViaStop" parameterType="com.example.demo.entity.ViaStop">
+        INSERT INTO
+        line_via_stop(ViaStopID,Name,Sequence,BusLineID,ViaStopLat,ViaStopLng)
+        VALUES (#{id},#{name},#{sequence},#{busLineID},#{location.lat},#{location.lng});
+    </insert>
+</mapper>

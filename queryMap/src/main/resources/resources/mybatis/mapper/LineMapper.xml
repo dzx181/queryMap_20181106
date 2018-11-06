@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE mapper
+                PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+                "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.LineMapper">
+
+<insert id="insertLine" parameterType="com.example.demo.entity.Line">
+    INSERT INTO
+    line_busline(BusLineID,Name,Type,CityCode,StartStop,EndStop,Company,Distance,BasicPrice,TotalPrice)
+    VALUES
+    (#{id},#{name},#{type},#{citycode},#{start_stop},#{end_stop},#{company},#{distance},#{basic_price},#{total_price});
+</insert>
+</mapper>

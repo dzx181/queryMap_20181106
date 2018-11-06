@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.dao.StationMapper">
+
+    <insert id="insertStation" parameterType="com.example.demo.entity.Station">
+    INSERT INTO bus_station(StationID,Name,AdCode,CityCode,Lat,Lng) VALUES (#{id},#{name},#{adcode},#{citycode},#{location.lat},#{location.lng});
+</insert>
+</mapper>

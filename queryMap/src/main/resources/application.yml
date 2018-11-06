@@ -1,0 +1,26 @@
+
+server:
+  port: 8090
+ 
+
+#mybaties配置:全局配置文件，sql映射文件
+mybatis:
+  config-location: classpath:resources/mybatis/mybatis-config.xml
+  mapper-locations: classpath:resources/mybatis/mapper/*.xml
+
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  application:
+    name: map
+  thymeleaf:
+    cache: false
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/db_bus?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
