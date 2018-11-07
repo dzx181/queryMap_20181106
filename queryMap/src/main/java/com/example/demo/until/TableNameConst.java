@@ -9,7 +9,6 @@ public class TableNameConst {
 	public static  String LINE_LOCATION = "line_location";
 	public static  String LINE_BUSLINE = "line_busline";
 	public static  String LINE_BOUND = "line_bound";
-
 	public static  String BUS_STATION = "bus_station";
 	public static  String BUS_LINE = "bus_line";
 

@@ -6,11 +6,11 @@
 <mapper namespace="com.example.demo.dao.MapMapper">
 
 	<select id="queryStationName" resultType="java.lang.String">
-		SELECT bus_stop.BusStopName FROM bus_stop ORDER BY bus_stop.ID  ASC
+		SELECT bus_stop.BusStopName FROM bus_stop ORDER BY bus_stop.ID
 	</select>
 
 	<select id="queryLineName" resultType="java.lang.String">
-		SELECT bus_route.BusRouteName FROM bus_route ORDER BY bus_route.ID ASC
+		SELECT bus_route.BusRouteName FROM bus_route ORDER BY bus_route.ID
 	</select>
 
 </mapper>
